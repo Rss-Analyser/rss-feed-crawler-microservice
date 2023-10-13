@@ -8,7 +8,7 @@ WORKDIR /usr/src/app
 COPY . .
 
 # Install the required dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r ./requirements.txt
 
 # Expose the port the app runs on
 EXPOSE 5001
