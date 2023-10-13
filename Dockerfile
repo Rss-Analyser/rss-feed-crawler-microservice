@@ -12,6 +12,8 @@ RUN ls -la
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
+RUN ls -la
+
 
 # Expose the port the app runs on
 EXPOSE 5001
