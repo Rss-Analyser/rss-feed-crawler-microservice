@@ -1,5 +1,4 @@
 flask
-sqlite3
 bs4
 requests
 PyPDF2
