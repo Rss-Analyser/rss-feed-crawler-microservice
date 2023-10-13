@@ -1,5 +1,5 @@
 database:
-  sqlite_path: "/Users/danieltremer/Documents/rss_feed_crawler/rss_links.db"
+  sqlite_path: "rss_links.db"
   rss_links_table_name: "rss_links"
   website_table_name: "rss_feed_websites"
 
