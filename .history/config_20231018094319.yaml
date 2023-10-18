@@ -2,13 +2,13 @@ database:
   sqlite_path: "rss_links.db"
   rss_links_table_name: "rss_links"
   website_table_name: "rss_feed_websites"
-
+  
   type: "cockroachdb"
   dbname: "rss_db"
-  user: root
-  password: null
-  host: "localhost"
-  port: "26257"
+  user: "YOUR_USER"
+  password: "YOUR_PASSWORD"
+  host: "YOUR_HOST"
+  port: "YOUR_PORT"
 
 csv:
   rss_links: "rss_links.csv"

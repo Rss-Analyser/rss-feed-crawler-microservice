@@ -5,10 +5,10 @@ database:
 
   type: "cockroachdb"
   dbname: "rss_db"
-  user: root
-  password: null
+  user: "YOUR_USER"
+  password: "YOUR_PASSWORD"
   host: "localhost"
-  port: "26257"
+  port: "8080"
 
 csv:
   rss_links: "rss_links.csv"

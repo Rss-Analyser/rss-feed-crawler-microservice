@@ -5,7 +5,7 @@ database:
 
   type: "cockroachdb"
   dbname: "rss_db"
-  user: root
+  user: null
   password: null
   host: "localhost"
   port: "26257"

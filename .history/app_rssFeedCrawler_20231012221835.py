@@ -6,7 +6,7 @@ os.chdir(dname)
 from flask import Flask, request, jsonify
 import threading
 from rssFeedCrawler import WebCrawler  # Change 'your_crawler_script_name' to the actual name of your script
-import psycopg2
+import sqlite3
 import yaml
 
 CONFIG_PATH = "./config.yaml"
@@ -15,23 +15,15 @@ CONFIG_PATH = "./config.yaml"
 with open(CONFIG_PATH, 'r') as file:
     config = yaml.safe_load(file)
 
-cockroachdb_conn_str = "dbname=" + config['database'].get('dbname', '')
-if 'user' in config['database'] and config['database']['user']:
-    cockroachdb_conn_str += " user=" + config['database']['user']
-if 'password' in config['database'] and config['database']['password']:
-    cockroachdb_conn_str += " password=" + config['database']['password']
-cockroachdb_conn_str += " host=" + config['database'].get('host', '')
-cockroachdb_conn_str += " port=" + config['database'].get('port', '')
-
-
+SQLITE_PATH = config['database']['sqlite_path']
 RSS_FEED_WEBSITES_TABLE_NAME = config['database']['website_table_name']
 RSS_LINKS_TABLE_NAME = config['database']['rss_links_table_name']
 
 def add_to_database(url):
     """Add a URL to the SQLite database if it's not already present."""
-    with psycopg2.connect(cockroachdb_conn_str) as conn:
+    with sqlite3.connect(SQLITE_PATH) as conn:
         cursor = conn.cursor()
-        cursor.execute(f"INSERT INTO {RSS_FEED_WEBSITES_TABLE_NAME} (website) VALUES (%s) ON CONFLICT (website) DO NOTHING", (url,))
+        cursor.execute(f"INSERT OR IGNORE INTO {RSS_FEED_WEBSITES_TABLE_NAME} (website) VALUES (?)", (url,))
         conn.commit()
 
 app = Flask(__name__)
@@ -51,7 +43,7 @@ def run_crawler():
     NEW_LINKS_ADDED = 0
     
     # Load URLs to be crawled from SQLite DB
-    with psycopg2.connect(cockroachdb_conn_str) as conn:
+    with sqlite3.connect(SQLITE_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute(f"SELECT website FROM {RSS_FEED_WEBSITES_TABLE_NAME}")
         urls_to_crawl = [row[0] for row in cursor.fetchall()]
@@ -69,11 +61,10 @@ def run_crawler():
     TOTAL_LINKS_FOUND = len(all_found_links)  # Update the links found counter
 
     # Save the crawled links into the SQLite database and count new links
-    with psycopg2.connect(cockroachdb_conn_str) as conn:
+    with sqlite3.connect(SQLITE_PATH) as conn:
         cursor = conn.cursor()
         for link in all_found_links:
-            cursor.execute(f"INSERT INTO {RSS_LINKS_TABLE_NAME} (link) VALUES (%s) ON CONFLICT (link) DO NOTHING", (link,))
-
+            cursor.execute(f"INSERT OR IGNORE INTO {RSS_LINKS_TABLE_NAME} (link) VALUES (?)", (link,))
             # If a new link was added (lastrowid returns the ID of the last row, which is non-zero if a new row was added)
             if cursor.lastrowid:
                 NEW_LINKS_ADDED += 1

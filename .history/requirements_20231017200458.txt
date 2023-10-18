@@ -4,4 +4,3 @@ requests
 PyPDF2
 PyYAML
 lxml
-psycopg2

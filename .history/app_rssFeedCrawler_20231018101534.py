@@ -31,7 +31,7 @@ def add_to_database(url):
     """Add a URL to the SQLite database if it's not already present."""
     with psycopg2.connect(cockroachdb_conn_str) as conn:
         cursor = conn.cursor()
-        cursor.execute(f"INSERT INTO {RSS_FEED_WEBSITES_TABLE_NAME} (website) VALUES (%s) ON CONFLICT (website) DO NOTHING", (url,))
+        cursor.execute(f"INSERT OR IGNORE INTO {RSS_FEED_WEBSITES_TABLE_NAME} (website) VALUES (?)", (url,))
         conn.commit()
 
 app = Flask(__name__)
@@ -72,8 +72,7 @@ def run_crawler():
     with psycopg2.connect(cockroachdb_conn_str) as conn:
         cursor = conn.cursor()
         for link in all_found_links:
-            cursor.execute(f"INSERT INTO {RSS_LINKS_TABLE_NAME} (link) VALUES (%s) ON CONFLICT (link) DO NOTHING", (link,))
-
+            cursor.execute(f"INSERT OR IGNORE INTO {RSS_LINKS_TABLE_NAME} (link) VALUES (?)", (link,))
             # If a new link was added (lastrowid returns the ID of the last row, which is non-zero if a new row was added)
             if cursor.lastrowid:
                 NEW_LINKS_ADDED += 1
